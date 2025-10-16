@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magass - Pause & Hydratation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>💆 Zen Event 💧</h1>
+    <p>Rappels pour mieux vivre vos événements 🎉</p>
+
+    <div class="section">
+      <h2>⏸️ Pause</h2>
+      <label>Durée (minutes): <input type="number" id="pause-time" value="45" min="1"></label>
+      <button id="start-pause">Démarrer pause</button>
+      <p id="pause-countdown"></p>
+    </div>
+
+    <div class="section">
+      <h2>🥤 Hydratation</h2>
+      <label>Intervalle (minutes): <input type="number" id="drink-time" value="30" min="1"></label>
+      <button id="start-drink">Démarrer hydratation</button>
+      <p id="drink-countdown"></p>
+    </div>
+
+    <div class="section tips">
+      <h2>💡 Conseils anti-fatigue</h2>
+      <ul>
+        <li>Respire profondément pendant 1 minute</li>
+        <li>Bois une gorgée d’eau régulièrement</li>
+        <li>Étire tes bras et ton cou doucement</li>
+        <li>Souris, ça libère de bonnes hormones 😄</li>
+      </ul>
+    </div>
+
+    <button id="toggle-theme">🌙 Thème Nuit</button>
+  </div>
+
+  <audio id="alert-sound" src="https://www.soundjay.com/buttons/beep-07.wav" preload="auto"></audio>
+
+  <script src="script.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Ma Boutique Moderne</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">🏍️ Ma Boutique</div>
+    <input type="text" id="search-bar" placeholder="Rechercher un produit...">
+    <select id="category-filter">
+      <option value="all">Toutes les catégories</option>
+      <option value="vetement">Vêtements</option>
+      <option value="accessoire">Accessoires</option>
+    </select>
+    <button id="show-cart">Panier (<span id="cart-count">0</span>)</button>
+  </header>
+
+  <main id="product-list">
+    <!-- Produits injectés par JS -->
+  </main>
+
+  <div id="toast" class="hidden">Produit ajouté au panier 🛒</div>
+
+  <section id="cart-section" class="hidden">
+    <div class="cart-header">
+      <h2>🧺 Panier</h2>
+      <button id="close-cart">✖</button>
+    </div>
+    <ul id="cart-items"></ul>
+    <div class="total-box">Total : <span id="total">0</span> FCFA</div>
+    <form id="order-form">
+      <h3>📝 Commander</h3>
+      <input type="text" placeholder="Nom complet" required>
+      <input type="email" placeholder="Email" required>
+      <input type="text" placeholder="Adresse de livraison" required>
+      <button type="submit">Valider la commande</button>
+    </form>
+  </section>
+
+  <footer>
+    <a href="contact.html">📞 Contactez-nous</a>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

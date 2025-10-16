@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lettre de motivation - Insa Mbaye</title>
+  <style>
+    :root {
+      --bg: #f9f9f9;
+      --text: #333;
+    }
+    body[data-theme="dark"] {
+      --bg: #1e1e1e;
+      --text: #f0f0f0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 40px;
+      transition: all 0.3s ease;
+    }
+
+    .lettre-container {
+      max-width: 800px;
+      margin: auto;
+      background-color: var(--bg);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #0d6efd;
+    }
+
+    .signature {
+      margin-top: 40px;
+      text-align: right;
+    }
+
+    .profile-img {
+      display: block;
+      margin: 0 auto 20px;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #0d6efd;
+    }
+
+    .theme-controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 999;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn-toggle, .select-theme {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-toggle {
+      background-color: #0d6efd;
+      color: white;
+    }
+
+    .select-theme {
+      background-color: white;
+      color: #0d6efd;
+    }
+
+    @media print {
+      .theme-controls {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body data-theme="light">
+
+  <div class="theme-controls">
+    <button class="btn-toggle" onclick="toggleTheme()">🌓 Mode clair/sombre</button>
+    <select class="select-theme" onchange="changeTheme(this.value)">
+      <option value="light">Clair</option>
+      <option value="dark">Sombre</option>
+      <option value="blue">Bleu</option>
+    </select>
+  </div>
+
+  <div class="lettre-container">
+    <img src="insa.jpg" class="profile-img" alt="Photo de profil" />
+
+    <h1>Lettre de motivation</h1>
+
+    <p><strong>Insa Mbaye</strong><br>
+    Étudiant en 2<sup>e</sup> année – ISEP de Diamniadio<br>
+    Technicien Supérieur en Développement Back-End<br>
+    Email : insam621.com@gmail.com<br>
+    Tél. : +221 76 555 59 92<br>
+    GitHub : <a href="https://github.com/mbayeinsa12" target="_blank">github.com/mbayeinsa12</a><br>
+    TikTok : <a href="https://www.tiktok.com/@mbayekiller1" target="_blank">@mbayekiller1</a><br>
+    Facebook : <a href="https://www.facebook.com/insa.mbaye.junior" target="_blank">insa.mbaye.junior</a>
+    </p>
+
+    <p><strong>Objet :</strong> Candidature pour un stage en développement back-end</p>
+
+    <p>Madame, Monsieur,</p>
+
+    <p>Actuellement étudiant en deuxième année à l’Institut Supérieur d’Enseignement Professionnel (ISEP) de Diamniadio, je poursuis une formation de Technicien Supérieur en Développement Back-End. Dans le cadre de ma formation, je suis à la recherche d’un stage pratique me permettant de mettre en œuvre les compétences acquises et d’évoluer dans un environnement professionnel stimulant.</p>
+
+    <p>Au cours de ma formation, j’ai acquis des compétences solides en développement web back-end avec des langages et technologies tels que PHP, MySQL, Node.js, JavaScript, ainsi que l’architecture MVC. J’ai également réalisé plusieurs projets pratiques, notamment un site de gestion de cotisations en ligne, un mini site e-commerce, ainsi que des API REST. Ces expériences m’ont permis de développer rigueur, autonomie et esprit d’équipe.</p>
+
+    <p>Intégrer votre structure serait pour moi une opportunité d’enrichir mon expérience, de participer à des projets concrets et de contribuer activement aux objectifs de votre équipe. Je suis particulièrement motivé, capable de m’adapter rapidement et déterminé à donner le meilleur de moi-même.</p>
+
+    <p>Je me tiens à votre disposition pour un entretien, au cours duquel je pourrais vous exposer plus en détail ma motivation et mes compétences.</p>
+
+    <p>Dans l’attente de votre retour, veuillez recevoir, Madame, Monsieur, l’expression de mes salutations distinguées.</p>
+
+    <div class="signature">
+      <p>Insa Mbaye</p>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const current = body.getAttribute("data-theme");
+      body.setAttribute("data-theme", current === "light" ? "dark" : "light");
+    }
+
+    function changeTheme(theme) {
+      document.body.setAttribute("data-theme", theme);
+    }
+  </script>
+
+</body>
+</html>
