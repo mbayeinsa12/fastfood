@@ -1,0 +1,2175 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fast Food Restaurant</title>
+    <script src="/_sdk/element_sdk.js"></script>
+    <script src="/_sdk/data_sdk.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        box-sizing: border-box;
+      }
+
+      .hero-bg {
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      }
+
+      .card-hover {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .whatsapp-btn {
+        background: #25d366;
+        transition: all 0.3s ease;
+      }
+
+      .whatsapp-btn:hover {
+        background: #128c7e;
+        transform: scale(1.05);
+      }
+
+      .menu-item {
+        border-left: 4px solid transparent;
+        transition: all 0.3s ease;
+      }
+
+      .menu-item:hover {
+        border-left-color: #ff6b35;
+        background-color: #fef7f0;
+      }
+
+      .floating-cart {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+      }
+
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1001;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+      }
+
+      .notification.show {
+        transform: translateX(0);
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1002;
+      }
+
+      .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .loading {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      .spinner {
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #ff6b35;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .rating-stars {
+        color: #fbbf24;
+      }
+
+      .loyalty-progress {
+        background: linear-gradient(90deg, #ff6b35 0%, #f7931e 100%);
+      }
+    </style>
+    <style>
+      @view-transition {
+        navigation: auto;
+      }
+    </style>
+  </head>
+  <body class="min-h-full bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+      <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center py-4">
+          <div class="flex items-center space-x-4">
+            <h1 id="nav-name" class="text-2xl font-bold text-orange-600">
+              Fast Food MbayeInsa
+            </h1>
+            <span
+              class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold"
+              >OUVERT</span
+            >
+          </div>
+          <div class="hidden md:flex space-x-6">
+            <a
+              href="#menu"
+              class="text-gray-700 hover:text-orange-600 transition-colors"
+              >Menu</a
+            >
+            <a
+              href="#offers"
+              class="text-gray-700 hover:text-orange-600 transition-colors"
+              >Offres</a
+            >
+            <a
+              href="#about"
+              class="text-gray-700 hover:text-orange-600 transition-colors"
+              >À Propos</a
+            >
+            <a
+              href="#contact"
+              class="text-gray-700 hover:text-orange-600 transition-colors"
+              >Contact</a
+            >
+          </div>
+          <div class="flex items-center space-x-4">
+            <button
+              id="cart-btn"
+              class="relative bg-orange-600 text-white px-4 py-2 rounded-full hover:bg-orange-700 transition-colors"
+            >
+              🛒 Panier
+              <span
+                id="cart-count"
+                class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center"
+                >0</span
+              >
+            </button>
+            <button id="mobile-menu" class="md:hidden text-gray-700">☰</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <!-- Hero Section -->
+    <header class="hero-bg text-white py-20 mt-16">
+      <div class="container mx-auto px-4 text-center">
+        <h1 id="restaurant-name" class="text-6xl font-bold mb-4">
+          Fast Food Palace
+        </h1>
+        <p id="restaurant-tagline" class="text-2xl opacity-90 mb-8">
+          Saveurs authentiques, service rapide
+        </p>
+        <div
+          class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8"
+        >
+          <div
+            class="flex items-center gap-2 bg-white bg-opacity-20 px-4 py-2 rounded-full"
+          >
+            <span>⏱️</span>
+            <span id="delivery-time">Livraison en 25-35 min</span>
+          </div>
+          <div
+            class="flex items-center gap-2 bg-white bg-opacity-20 px-4 py-2 rounded-full"
+          >
+            <span>🚚</span> <span id="delivery-fee">Gratuit dès 25€</span>
+          </div>
+          <div
+            class="flex items-center gap-2 bg-white bg-opacity-20 px-4 py-2 rounded-full"
+          >
+            <span>⭐</span> <span>4.8/5 (2,847 avis)</span>
+          </div>
+        </div>
+        <button
+          id="hero-order-btn"
+          class="whatsapp-btn text-white px-10 py-4 rounded-full font-bold text-lg inline-flex items-center gap-3"
+        >
+          <svg width="28" height="28" viewbox="0 0 24 24" fill="currentColor">
+            <path
+              d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.893 3.386"
+            />
+          </svg>
+          Commander Maintenant
+        </button>
+      </div>
+    </header>
+    <!-- Quick Stats -->
+    <section class="py-12 bg-white">
+      <div class="container mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div>
+            <div class="text-3xl font-bold text-orange-600 mb-2">15+</div>
+            <div class="text-gray-600">Années d'expérience</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-orange-600 mb-2">50K+</div>
+            <div class="text-gray-600">Clients satisfaits</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-orange-600 mb-2">25min</div>
+            <div class="text-gray-600">Livraison moyenne</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-orange-600 mb-2">4.8★</div>
+            <div class="text-gray-600">Note moyenne</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Menu Categories -->
+    <section class="py-8 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <div class="flex overflow-x-auto space-x-4 pb-4">
+          <button
+            class="category-btn active bg-orange-600 text-white px-6 py-3 rounded-full whitespace-nowrap"
+            data-category="all"
+          >
+            🍽️ Tout
+          </button>
+          <button
+            class="category-btn bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap hover:bg-orange-100"
+            data-category="burgers"
+          >
+            🍔 Burgers
+          </button>
+          <button
+            class="category-btn bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap hover:bg-orange-100"
+            data-category="pizza"
+          >
+            🍕 Pizzas
+          </button>
+          <button
+            class="category-btn bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap hover:bg-orange-100"
+            data-category="tacos"
+          >
+            🌮 Tacos
+          </button>
+          <button
+            class="category-btn bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap hover:bg-orange-100"
+            data-category="sides"
+          >
+            🍟 Accompagnements
+          </button>
+          <button
+            class="category-btn bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap hover:bg-orange-100"
+            data-category="drinks"
+          >
+            🥤 Boissons
+          </button>
+          <button
+            class="category-btn bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap hover:bg-orange-100"
+            data-category="desserts"
+          >
+            🍰 Desserts
+          </button>
+        </div>
+      </div>
+    </section>
+    <!-- Featured Item -->
+    <section id="menu" class="py-16 bg-white">
+      <div class="container mx-auto px-4">
+        <h2 class="text-5xl font-bold text-center mb-4 text-gray-800">
+          Notre Menu
+        </h2>
+        <p class="text-center text-gray-600 mb-16">
+          Des saveurs authentiques préparées avec passion
+        </p>
+        <!-- Plat Vedette -->
+        <div class="max-w-6xl mx-auto mb-20">
+          <div
+            class="bg-gradient-to-r from-orange-50 to-red-50 rounded-3xl p-8 card-hover"
+          >
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+              <div
+                class="w-80 h-80 bg-gradient-to-br from-orange-200 to-red-200 rounded-3xl flex items-center justify-center"
+              >
+                <svg
+                  width="200"
+                  height="200"
+                  viewbox="0 0 200 200"
+                  class="text-orange-600"
+                >
+                  <circle
+                    cx="100"
+                    cy="60"
+                    r="50"
+                    fill="currentColor"
+                    opacity="0.8"
+                  />
+                  <rect
+                    x="50"
+                    y="95"
+                    width="100"
+                    height="18"
+                    rx="9"
+                    fill="currentColor"
+                    opacity="0.6"
+                  />
+                  <rect
+                    x="55"
+                    y="118"
+                    width="90"
+                    height="15"
+                    rx="7"
+                    fill="currentColor"
+                    opacity="0.7"
+                  />
+                  <rect
+                    x="60"
+                    y="138"
+                    width="80"
+                    height="12"
+                    rx="6"
+                    fill="currentColor"
+                    opacity="0.5"
+                  />
+                  <circle
+                    cx="100"
+                    cy="165"
+                    r="45"
+                    fill="currentColor"
+                    opacity="0.9"
+                  />
+                </svg>
+              </div>
+              <div class="flex-1 text-center lg:text-left">
+                <div
+                  class="bg-red-500 text-white px-4 py-2 rounded-full inline-block mb-4 text-sm font-bold"
+                >
+                  ⭐ PLAT VEDETTE
+                </div>
+                <h3
+                  id="featured-item"
+                  class="text-4xl font-bold text-gray-800 mb-4"
+                >
+                  Burger Signature
+                </h3>
+                <p class="text-gray-600 mb-6 text-lg">
+                  Notre création exclusive : double steak de bœuf premium,
+                  fromage cheddar affiné, salade croquante, tomate fraîche,
+                  oignon caramélisé et notre sauce secrète maison
+                </p>
+                <div
+                  class="flex items-center justify-center lg:justify-start gap-6 mb-6"
+                >
+                  <span
+                    id="featured-price"
+                    class="text-4xl font-bold text-orange-600"
+                    >14.90€</span
+                  >
+                  <div class="flex items-center gap-1">
+                    <span class="rating-stars">★★★★★</span>
+                    <span class="text-gray-600 ml-2">(4.9/5)</span>
+                  </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4">
+                  <button
+                    class="whatsapp-btn text-white px-8 py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2"
+                    onclick="addToCart('featured')"
+                  >
+                    🛒 Ajouter au Panier
+                  </button>
+                  <button
+                    class="bg-gray-200 text-gray-800 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-300 transition-colors"
+                    onclick="showItemDetails('featured')"
+                  >
+                    📋 Détails
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Menu Grid -->
+        <div
+          id="menu-grid"
+          class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+        >
+          <!-- Menu items will be populated by JavaScript -->
+        </div>
+      </div>
+    </section>
+    <!-- Promotions -->
+    <section
+      id="offers"
+      class="py-16 bg-gradient-to-r from-red-50 to-orange-50"
+    >
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-4 text-gray-800">
+          Offres Spéciales
+        </h2>
+        <p class="text-center text-gray-600 mb-12">
+          Profitez de nos promotions exceptionnelles
+        </p>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+          <div
+            class="bg-white rounded-2xl p-6 shadow-lg card-hover border-l-4 border-red-500"
+          >
+            <div class="text-center">
+              <div class="text-4xl mb-4">🎉</div>
+              <h3 class="text-xl font-bold mb-2 text-red-600">Happy Hour</h3>
+              <p class="text-gray-600 mb-4">
+                -25% sur tous les burgers de 15h à 18h
+              </p>
+              <span
+                class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold"
+                >Lun-Ven</span
+              >
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-2xl p-6 shadow-lg card-hover border-l-4 border-green-500"
+          >
+            <div class="text-center">
+              <div class="text-4xl mb-4">🚚</div>
+              <h3 class="text-xl font-bold mb-2 text-green-600">
+                Livraison Express
+              </h3>
+              <p class="text-gray-600 mb-4">
+                Livraison gratuite et rapide dès 25€
+              </p>
+              <span
+                class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold"
+                >7j/7</span
+              >
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-2xl p-6 shadow-lg card-hover border-l-4 border-purple-500"
+          >
+            <div class="text-center">
+              <div class="text-4xl mb-4">👥</div>
+              <h3 class="text-xl font-bold mb-2 text-purple-600">
+                Menu Famille
+              </h3>
+              <p class="text-gray-600 mb-4">
+                4 burgers + 4 frites + 4 boissons
+              </p>
+              <span
+                class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold"
+                >29 000 CFA au lieu de 35 000 CFA</span
+              >
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-2xl p-6 shadow-lg card-hover border-l-4 border-blue-500"
+          >
+            <div class="text-center">
+              <div class="text-4xl mb-4">🎁</div>
+              <h3 class="text-xl font-bold mb-2 text-blue-600">
+                Programme Fidélité
+              </h3>
+              <p class="text-gray-600 mb-4">
+                1 repas gratuit tous les 10 achats
+              </p>
+              <span
+                class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold"
+                >Nouveau</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-white">
+      <div class="container mx-auto px-4">
+        <div class="max-w-6xl mx-auto">
+          <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 class="text-4xl font-bold mb-6 text-gray-800">
+                Notre Histoire
+              </h2>
+              <p class="text-gray-600 mb-6 text-lg">
+                Depuis plus de 15 ans, nous préparons avec passion des plats
+                savoureux en utilisant uniquement des ingrédients frais et de
+                qualité. Notre équipe de chefs expérimentés travaille chaque
+                jour pour vous offrir une expérience culinaire exceptionnelle.
+              </p>
+              <div class="grid grid-cols-2 gap-6 mb-8">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-orange-600 mb-2">
+                    100%
+                  </div>
+                  <div class="text-gray-600">Ingrédients Frais</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-orange-600 mb-2">
+                    24/7
+                  </div>
+                  <div class="text-gray-600">Service Client</div>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-4">
+                <span
+                  class="bg-orange-100 text-orange-800 px-4 py-2 rounded-full text-sm font-semibold"
+                  >🥩 Viande Premium</span
+                >
+                <span
+                  class="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold"
+                  >🌱 Options Végétariennes</span
+                >
+                <span
+                  class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold"
+                  >🚫 Sans Gluten</span
+                >
+              </div>
+            </div>
+            <div
+              class="bg-gradient-to-br from-orange-100 to-red-100 rounded-3xl p-8 flex items-center justify-center"
+            >
+              <svg
+                width="300"
+                height="250"
+                viewbox="0 0 300 250"
+                class="text-orange-600"
+              >
+                <rect
+                  x="50"
+                  y="50"
+                  width="200"
+                  height="150"
+                  rx="20"
+                  fill="currentColor"
+                  opacity="0.1"
+                />
+                <circle
+                  cx="150"
+                  cy="100"
+                  r="30"
+                  fill="currentColor"
+                  opacity="0.8"
+                />
+                <rect
+                  x="100"
+                  y="130"
+                  width="100"
+                  height="15"
+                  rx="7"
+                  fill="currentColor"
+                  opacity="0.6"
+                />
+                <rect
+                  x="110"
+                  y="150"
+                  width="80"
+                  height="12"
+                  rx="6"
+                  fill="currentColor"
+                  opacity="0.7"
+                />
+                <circle
+                  cx="150"
+                  cy="180"
+                  r="25"
+                  fill="currentColor"
+                  opacity="0.9"
+                />
+                <path
+                  d="M80 80 Q150 60 220 80"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  fill="none"
+                  opacity="0.5"
+                />
+                <circle
+                  cx="100"
+                  cy="75"
+                  r="8"
+                  fill="currentColor"
+                  opacity="0.6"
+                />
+                <circle
+                  cx="200"
+                  cy="75"
+                  r="8"
+                  fill="currentColor"
+                  opacity="0.6"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Reviews Section -->
+    <section class="py-16 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-4 text-gray-800">
+          Avis Clients
+        </h2>
+        <p class="text-center text-gray-600 mb-12">
+          Ce que disent nos clients fidèles
+        </p>
+        <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
+          <div class="bg-white rounded-2xl p-8 shadow-lg">
+            <div class="flex items-center mb-6">
+              <div class="flex text-yellow-400 text-xl">★★★★★</div>
+              <span class="ml-2 text-gray-600 font-semibold">5/5</span>
+            </div>
+            <p class="text-gray-700 mb-6 text-lg">
+              "Absolument délicieux ! Le burger signature est un vrai régal et
+              la livraison est toujours rapide. Service client au top !"
+            </p>
+            <div class="flex items-center">
+              <div
+                class="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg"
+              >
+                M
+              </div>
+              <div class="ml-4">
+                <p class="font-bold text-gray-800">Marie Dubois</p>
+                <p class="text-sm text-gray-500">Il y a 2 jours</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-8 shadow-lg">
+            <div class="flex items-center mb-6">
+              <div class="flex text-yellow-400 text-xl">★★★★★</div>
+              <span class="ml-2 text-gray-600 font-semibold">5/5</span>
+            </div>
+            <p class="text-gray-700 mb-6 text-lg">
+              "Excellent rapport qualité-prix ! Les portions sont généreuses et
+              les saveurs authentiques. Je recommande vivement !"
+            </p>
+            <div class="flex items-center">
+              <div
+                class="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg"
+              >
+                J
+              </div>
+              <div class="ml-4">
+                <p class="font-bold text-gray-800">Jean Martin</p>
+                <p class="text-sm text-gray-500">Il y a 1 semaine</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-8 shadow-lg">
+            <div class="flex items-center mb-6">
+              <div class="flex text-yellow-400 text-xl">★★★★☆</div>
+              <span class="ml-2 text-gray-600 font-semibold">4/5</span>
+            </div>
+            <p class="text-gray-700 mb-6 text-lg">
+              "Très bon fast-food avec des options variées. Les pizzas sont
+              particulièrement savoureuses. Livraison ponctuelle."
+            </p>
+            <div class="flex items-center">
+              <div
+                class="w-12 h-12 bg-gradient-to-br from-pink-400 to-red-500 rounded-full flex items-center justify-center text-white font-bold text-lg"
+              >
+                S
+              </div>
+              <div class="ml-4">
+                <p class="font-bold text-gray-800">Sophie Laurent</p>
+                <p class="text-sm text-gray-500">Il y a 3 jours</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Review Form -->
+        <div class="max-w-2xl mx-auto bg-white rounded-2xl p-8 shadow-lg">
+          <h3 class="text-2xl font-bold mb-6 text-center text-gray-800">
+            Laissez votre avis
+          </h3>
+          <form id="review-form" class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label
+                  for="review-name"
+                  class="block text-sm font-semibold text-gray-700 mb-2"
+                  >Nom</label
+                >
+                <input
+                  type="text"
+                  id="review-name"
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label
+                  for="review-email"
+                  class="block text-sm font-semibold text-gray-700 mb-2"
+                  >Email</label
+                >
+                <input
+                  type="email"
+                  id="review-email"
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Note</label
+              >
+              <div class="flex gap-2">
+                <button
+                  type="button"
+                  class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors"
+                  data-rating="1"
+                >
+                  ★
+                </button>
+                <button
+                  type="button"
+                  class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors"
+                  data-rating="2"
+                >
+                  ★
+                </button>
+                <button
+                  type="button"
+                  class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors"
+                  data-rating="3"
+                >
+                  ★
+                </button>
+                <button
+                  type="button"
+                  class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors"
+                  data-rating="4"
+                >
+                  ★
+                </button>
+                <button
+                  type="button"
+                  class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors"
+                  data-rating="5"
+                >
+                  ★
+                </button>
+              </div>
+            </div>
+            <div>
+              <label
+                for="review-message"
+                class="block text-sm font-semibold text-gray-700 mb-2"
+                >Votre avis</label
+              >
+              <textarea
+                id="review-message"
+                rows="4"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Partagez votre expérience..."
+              ></textarea>
+            </div>
+            <button
+              type="submit"
+              id="review-submit"
+              class="w-full bg-orange-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-orange-700 transition-colors"
+            >
+              Publier l'avis
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-white">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-4 text-gray-800">
+          Nous Contacter
+        </h2>
+        <p class="text-center text-gray-600 mb-12">
+          Une question ? Nous sommes là pour vous aider
+        </p>
+        <div class="max-w-6xl mx-auto">
+          <div class="grid lg:grid-cols-2 gap-12">
+            <!-- Contact Info -->
+            <div
+              class="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-8"
+            >
+              <h3 class="text-2xl font-bold mb-8 text-gray-800">
+                Informations
+              </h3>
+              <div class="space-y-6">
+                <div class="flex items-start gap-4">
+                  <div class="bg-orange-600 text-white p-3 rounded-full">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewbox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                      />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-gray-800">Adresse</p>
+                    <p id="contact-address" class="text-gray-600">
+                      123 Avenue des Champs, Paris
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-4">
+                  <div class="bg-orange-600 text-white p-3 rounded-full">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewbox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-gray-800">Téléphone</p>
+                    <p id="contact-phone" class="text-gray-600">
+                      +33 1 23 45 67 89
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-4">
+                  <div class="bg-orange-600 text-white p-3 rounded-full">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewbox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-gray-800">Email</p>
+                    <p id="contact-email" class="text-gray-600">
+                      contact@fastfoodpalace.fr
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-4">
+                  <div class="bg-orange-600 text-white p-3 rounded-full">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewbox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12,6 12,12 16,14" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-gray-800">Horaires</p>
+                    <p class="text-gray-600">Lun-Dim: 11h00 - 23h30</p>
+                    <p class="text-sm text-green-600 font-semibold">
+                      Ouvert maintenant
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="flex gap-4 mt-8">
+                <button
+                  onclick="openGoogleMaps()"
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold transition-colors"
+                >
+                  📍 Google Maps
+                </button>
+                <button
+                  onclick="callRestaurant()"
+                  class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-semibold transition-colors"
+                >
+                  📞 Appeler
+                </button>
+              </div>
+            </div>
+            <!-- Contact Form -->
+            <div class="bg-white rounded-2xl p-8 shadow-lg border">
+              <h3 class="text-2xl font-bold mb-6 text-gray-800">
+                Envoyez-nous un message
+              </h3>
+              <form id="contact-form" class="space-y-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      for="contact-name"
+                      class="block text-sm font-semibold text-gray-700 mb-2"
+                      >Nom</label
+                    >
+                    <input
+                      type="text"
+                      id="contact-name"
+                      required
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      for="contact-email-form"
+                      class="block text-sm font-semibold text-gray-700 mb-2"
+                      >Email</label
+                    >
+                    <input
+                      type="email"
+                      id="contact-email-form"
+                      required
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label
+                    for="contact-phone-form"
+                    class="block text-sm font-semibold text-gray-700 mb-2"
+                    >Téléphone</label
+                  >
+                  <input
+                    type="tel"
+                    id="contact-phone-form"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="contact-message"
+                    class="block text-sm font-semibold text-gray-700 mb-2"
+                    >Message</label
+                  >
+                  <textarea
+                    id="contact-message"
+                    rows="5"
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    placeholder="Votre message..."
+                  ></textarea>
+                </div>
+                <button
+                  type="submit"
+                  id="contact-submit"
+                  class="w-full bg-orange-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-orange-700 transition-colors"
+                >
+                  Envoyer le message
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
+      <div class="container mx-auto px-4">
+        <div class="grid md:grid-cols-4 gap-8 mb-12">
+          <!-- Restaurant Info -->
+          <div>
+            <h3 id="footer-name" class="text-3xl font-bold mb-6">
+              Fast Food Palace
+            </h3>
+            <p class="text-gray-400 mb-6">
+              Le meilleur fast-food de la ville avec des ingrédients frais et de
+              qualité premium.
+            </p>
+            <div class="flex space-x-4">
+              <a
+                id="footer-facebook"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-400 hover:text-blue-500 transition-colors"
+              >
+                <svg
+                  width="28"
+                  height="28"
+                  viewbox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                  /></svg
+              ></a>
+              <a
+                id="footer-instagram"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-400 hover:text-pink-500 transition-colors"
+              >
+                <svg
+                  width="28"
+                  height="28"
+                  viewbox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+                  /></svg
+              ></a>
+              <a
+                href="#"
+                class="text-gray-400 hover:text-red-500 transition-colors"
+              >
+                <svg
+                  width="28"
+                  height="28"
+                  viewbox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+                  /></svg
+              ></a>
+              <a
+                href="#"
+                class="text-gray-400 hover:text-blue-400 transition-colors"
+              >
+                <svg
+                  width="28"
+                  height="28"
+                  viewbox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"
+                  /></svg
+              ></a>
+            </div>
+          </div>
+          <!-- Quick Links -->
+          <div>
+            <h4 class="text-xl font-bold mb-6">Navigation</h4>
+            <ul class="space-y-3 text-gray-400">
+              <li>
+                <a href="#menu" class="hover:text-white transition-colors"
+                  >Notre Menu</a
+                >
+              </li>
+              <li>
+                <a href="#offers" class="hover:text-white transition-colors"
+                  >Promotions</a
+                >
+              </li>
+              <li>
+                <a href="#about" class="hover:text-white transition-colors"
+                  >À Propos</a
+                >
+              </li>
+              <li>
+                <a href="#contact" class="hover:text-white transition-colors"
+                  >Contact</a
+                >
+              </li>
+              <li>
+                <a href="#" class="hover:text-white transition-colors"
+                  >Conditions</a
+                >
+              </li>
+              <li>
+                <a href="#" class="hover:text-white transition-colors"
+                  >Confidentialité</a
+                >
+              </li>
+            </ul>
+          </div>
+          <!-- Services -->
+          <div>
+            <h4 class="text-xl font-bold mb-6">Services</h4>
+            <ul class="space-y-3 text-gray-400">
+              <li class="flex items-center gap-2">
+                <span>🚚</span> <span>Livraison à domicile</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span>🥡</span> <span>Commande à emporter</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span>💳</span> <span>Paiement en ligne</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span>⏰</span> <span>Commande 24h/24</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span>🎁</span> <span>Programme fidélité</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span>📱</span> <span>Application mobile</span>
+              </li>
+            </ul>
+          </div>
+          <!-- Contact -->
+          <div>
+            <h4 class="text-xl font-bold mb-6">Contact</h4>
+            <div class="space-y-3 text-gray-400">
+              <p id="footer-address">123 Avenue des Champs, Paris</p>
+              <p id="footer-phone">+33 1 23 45 67 89</p>
+              <p id="footer-email-display">contact@fastfoodpalace.fr</p>
+              <p class="text-green-400 font-semibold">Ouvert: 11h00 - 23h30</p>
+            </div>
+            <button
+              onclick="orderWhatsApp()"
+              class="whatsapp-btn text-white px-6 py-3 rounded-full font-bold mt-6 inline-flex items-center gap-2"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewbox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.893 3.386"
+                />
+              </svg>
+              Commander
+            </button>
+          </div>
+        </div>
+        <!-- Bottom Footer -->
+        <div class="border-t border-gray-800 pt-8">
+          <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="text-gray-400 text-sm mb-4 md:mb-0">
+              <p>© 2024 Fast Food Palace. Tous droits réservés.</p>
+            </div>
+            <div class="flex items-center gap-4 text-sm text-gray-400">
+              <span>Paiement sécurisé</span> <span>•</span>
+              <span>Livraison rapide</span> <span>•</span>
+              <span>Service client 24/7</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <!-- Floating Cart -->
+    <div class="floating-cart">
+      <button
+        id="floating-cart-btn"
+        class="bg-orange-600 text-white p-4 rounded-full shadow-lg hover:bg-orange-700 transition-colors relative"
+      >
+        🛒
+        <span
+          id="floating-cart-count"
+          class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center"
+          >0</span
+        >
+      </button>
+    </div>
+    <!-- Notification -->
+    <div
+      id="notification"
+      class="notification bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg"
+    >
+      <div class="flex items-center gap-3">
+        <span>✅</span>
+        <span id="notification-text">Article ajouté au panier !</span>
+      </div>
+    </div>
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="modal">
+      <div
+        class="bg-white rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto"
+      >
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold text-gray-800">Votre Panier</h3>
+          <button
+            id="close-cart"
+            class="text-gray-500 hover:text-gray-700 text-2xl"
+          >
+            ×
+          </button>
+        </div>
+        <div id="cart-items" class="space-y-4 mb-6">
+          <!-- Cart items will be populated here -->
+        </div>
+        <div class="border-t pt-4">
+          <div class="flex justify-between items-center mb-4">
+            <span class="text-xl font-bold">Total:</span>
+            <span id="cart-total" class="text-2xl font-bold text-orange-600"
+              >0.00€</span
+            >
+          </div>
+          <button
+            id="checkout-btn"
+            class="w-full whatsapp-btn text-white py-4 rounded-lg font-bold text-lg"
+          >
+            Commander via WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Item Details Modal -->
+    <div id="item-modal" class="modal">
+      <div class="bg-white rounded-2xl p-8 max-w-lg w-full mx-4">
+        <div class="flex justify-between items-center mb-6">
+          <h3
+            id="item-modal-title"
+            class="text-2xl font-bold text-gray-800"
+          ></h3>
+          <button
+            id="close-item-modal"
+            class="text-gray-500 hover:text-gray-700 text-2xl"
+          >
+            ×
+          </button>
+        </div>
+        <div id="item-modal-content">
+          <!-- Item details will be populated here -->
+        </div>
+      </div>
+    </div>
+    <script>
+      // Configuration
+      const defaultConfig = {
+        restaurant_name: "Fast Food Palace",
+        restaurant_tagline: "Saveurs authentiques, service rapide",
+        phone_number: "+33123456789",
+        address: "123 Avenue des Champs, Paris",
+        email: "contact@fastfoodpalace.fr",
+        delivery_time: "25-35 minutes",
+        delivery_fee: "Gratuit dès 15 000 CFA",
+        featured_item: "Burger Signature",
+        featured_price: "8900 CFA",
+        facebook_url: "https://facebook.com/fastfoodpalace",
+        instagram_url: "https://instagram.com/fastfoodpalace",
+        primary_color: "#ff6b35",
+        secondary_color: "#f7931e",
+        surface_color: "#ffffff",
+        text_color: "#1f2937",
+        accent_color: "#25d366",
+      };
+
+      // Global variables
+      let cart = [];
+      let currentRating = 0;
+      let currentRecordCount = 0;
+
+      // Menu data
+      const menuItems = {
+        burgers: [
+          {
+            id: "classic-burger",
+            name: "Classic Burger",
+            price: 5900,
+            description: "Steak de bœuf, salade, tomate, oignon",
+            image: "🍔",
+          },
+          {
+            id: "cheese-burger",
+            name: "Cheese Burger",
+            price: 6500,
+            description: "Steak de bœuf, fromage cheddar, salade",
+            image: "🧀",
+          },
+          {
+            id: "bacon-burger",
+            name: "Bacon Burger",
+            price: 7700,
+            description: "Steak de bœuf, bacon croustillant, fromage",
+            image: "🥓",
+          },
+          {
+            id: "chicken-burger",
+            name: "Chicken Deluxe",
+            price: 7100,
+            description: "Filet de poulet croustillant, mayo",
+            image: "🐔",
+          },
+        ],
+        pizza: [
+          {
+            id: "margherita",
+            name: "Pizza Margherita",
+            price: 7700,
+            description: "Tomate, mozzarella, basilic frais",
+            image: "🍕",
+          },
+          {
+            id: "pepperoni",
+            name: "Pizza Pepperoni",
+            price: 8900,
+            description: "Tomate, mozzarella, pepperoni",
+            image: "🍕",
+          },
+          {
+            id: "quattro",
+            name: "Pizza Quattro",
+            price: 10100,
+            description: "4 fromages, tomate, herbes",
+            image: "🍕",
+          },
+        ],
+        tacos: [
+          {
+            id: "chicken-tacos",
+            name: "Tacos Poulet",
+            price: 5300,
+            description: "Poulet grillé, salade, tomate, sauce",
+            image: "🌮",
+          },
+          {
+            id: "beef-tacos",
+            name: "Tacos Bœuf",
+            price: 5900,
+            description: "Bœuf épicé, salade, fromage, sauce",
+            image: "🌮",
+          },
+          {
+            id: "veggie-tacos",
+            name: "Tacos Végé",
+            price: 4700,
+            description: "Légumes grillés, avocat, sauce",
+            image: "🥑",
+          },
+        ],
+        sides: [
+          {
+            id: "fries",
+            name: "Frites Maison",
+            price: 2700,
+            description: "Frites fraîches et croustillantes",
+            image: "🍟",
+          },
+          {
+            id: "onion-rings",
+            name: "Rondelles Oignon",
+            price: 3300,
+            description: "Oignons panés et frits",
+            image: "🧅",
+          },
+          {
+            id: "nuggets",
+            name: "Nuggets Poulet",
+            price: 4100,
+            description: "8 nuggets de poulet croustillants",
+            image: "🍗",
+          },
+        ],
+        drinks: [
+          {
+            id: "coca",
+            name: "Coca-Cola",
+            price: 1500,
+            description: "Canette 33cl",
+            image: "🥤",
+          },
+          {
+            id: "sprite",
+            name: "Sprite",
+            price: 1500,
+            description: "Canette 33cl",
+            image: "🥤",
+          },
+          {
+            id: "water",
+            name: "Eau Minérale",
+            price: 900,
+            description: "Bouteille 50cl",
+            image: "💧",
+          },
+        ],
+        desserts: [
+          {
+            id: "ice-cream",
+            name: "Glace Vanille",
+            price: 2300,
+            description: "2 boules de glace vanille",
+            image: "🍦",
+          },
+          {
+            id: "cookie",
+            name: "Cookie Chocolat",
+            price: 1700,
+            description: "Cookie aux pépites de chocolat",
+            image: "🍪",
+          },
+          {
+            id: "muffin",
+            name: "Muffin Myrtille",
+            price: 2100,
+            description: "Muffin aux myrtilles fraîches",
+            image: "🧁",
+          },
+        ],
+      };
+
+      // Data SDK handler
+      const dataHandler = {
+        onDataChanged(data) {
+          currentRecordCount = data.length;
+          // Update UI if needed for reviews/contacts display
+        },
+      };
+
+      // Initialize Data SDK
+      async function initDataSdk() {
+        if (window.dataSdk) {
+          const result = await window.dataSdk.init(dataHandler);
+          if (!result.isOk) {
+            console.error("Failed to initialize data SDK");
+          }
+        }
+      }
+
+      // Utility functions
+      function showNotification(message, type = "success") {
+        const notification = document.getElementById("notification");
+        const notificationText = document.getElementById("notification-text");
+
+        notificationText.textContent = message;
+        notification.className = `notification ${
+          type === "success" ? "bg-green-500" : "bg-red-500"
+        } text-white px-6 py-4 rounded-lg shadow-lg show`;
+
+        setTimeout(() => {
+          notification.classList.remove("show");
+        }, 3000);
+      }
+
+      function showLoading(element) {
+        element.classList.add("loading");
+        const originalText = element.textContent;
+        element.innerHTML =
+          '<div class="spinner inline-block mr-2"></div>Chargement...';
+        return originalText;
+      }
+
+      function hideLoading(element, originalText) {
+        element.classList.remove("loading");
+        element.textContent = originalText;
+      }
+
+      // Cart functions
+      function addToCart(itemId) {
+        let item;
+
+        if (itemId === "featured") {
+          item = {
+            id: "featured",
+            name:
+              window.elementSdk?.config?.featured_item ||
+              defaultConfig.featured_item,
+            price: parseFloat(
+              (
+                window.elementSdk?.config?.featured_price ||
+                defaultConfig.featured_price
+              ).replace(" CFA", "")
+            ),
+            quantity: 1,
+          };
+        } else {
+          // Find item in menu
+          for (const category in menuItems) {
+            const foundItem = menuItems[category].find(
+              (menuItem) => menuItem.id === itemId
+            );
+            if (foundItem) {
+              item = { ...foundItem, quantity: 1 };
+              break;
+            }
+          }
+        }
+
+        if (!item) return;
+
+        const existingItem = cart.find((cartItem) => cartItem.id === item.id);
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          cart.push(item);
+        }
+
+        updateCartUI();
+        showNotification(`${item.name} ajouté au panier !`);
+      }
+
+      function removeFromCart(itemId) {
+        cart = cart.filter((item) => item.id !== itemId);
+        updateCartUI();
+      }
+
+      function updateCartQuantity(itemId, quantity) {
+        const item = cart.find((cartItem) => cartItem.id === itemId);
+        if (item) {
+          item.quantity = Math.max(0, quantity);
+          if (item.quantity === 0) {
+            removeFromCart(itemId);
+          }
+        }
+        updateCartUI();
+      }
+
+      function updateCartUI() {
+        const cartCount = document.getElementById("cart-count");
+        const floatingCartCount = document.getElementById(
+          "floating-cart-count"
+        );
+        const cartItems = document.getElementById("cart-items");
+        const cartTotal = document.getElementById("cart-total");
+
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const totalPrice = cart.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
+
+        cartCount.textContent = totalItems;
+        floatingCartCount.textContent = totalItems;
+        cartTotal.textContent = totalPrice.toLocaleString() + " CFA";
+
+        cartItems.innerHTML = "";
+
+        if (cart.length === 0) {
+          cartItems.innerHTML =
+            '<p class="text-gray-500 text-center py-8">Votre panier est vide</p>';
+        } else {
+          cart.forEach((item) => {
+            const cartItem = document.createElement("div");
+            cartItem.className =
+              "flex items-center justify-between bg-gray-50 p-4 rounded-lg";
+            cartItem.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <span class="text-2xl">${item.image || "🍽️"}</span>
+                            <div>
+                                <h4 class="font-semibold">${item.name}</h4>
+                                <p class="text-gray-600">${item.price.toLocaleString()} CFA</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="updateCartQuantity('${item.id}', ${
+              item.quantity - 1
+            })" class="bg-gray-200 text-gray-700 w-8 h-8 rounded-full hover:bg-gray-300">-</button>
+                            <span class="font-semibold">${item.quantity}</span>
+                            <button onclick="updateCartQuantity('${item.id}', ${
+              item.quantity + 1
+            })" class="bg-orange-600 text-white w-8 h-8 rounded-full hover:bg-orange-700">+</button>
+                            <button onclick="removeFromCart('${
+                              item.id
+                            }')" class="text-red-500 hover:text-red-700 ml-2">🗑️</button>
+                        </div>
+                    `;
+            cartItems.appendChild(cartItem);
+          });
+        }
+      }
+
+      // Menu functions
+      function renderMenu(category = "all") {
+        const menuGrid = document.getElementById("menu-grid");
+        menuGrid.innerHTML = "";
+
+        const itemsToShow =
+          category === "all"
+            ? Object.values(menuItems).flat()
+            : menuItems[category] || [];
+
+        itemsToShow.forEach((item) => {
+          const menuItem = document.createElement("div");
+          menuItem.className =
+            "menu-item bg-white rounded-xl p-6 shadow-lg card-hover";
+          menuItem.innerHTML = `
+                    <div class="w-full h-48 bg-gradient-to-br from-orange-100 to-red-100 rounded-xl mb-4 flex items-center justify-center">
+                        <span class="text-6xl">${item.image}</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">${item.name}</h3>
+                    <p class="text-gray-600 mb-4">${item.description}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-2xl font-bold text-orange-600">${item.price.toLocaleString()} CFA</span>
+                        <div class="flex gap-2">
+                            <button onclick="showItemDetails('${
+                              item.id
+                            }')" class="bg-gray-200 text-gray-700 px-3 py-2 rounded-full text-sm hover:bg-gray-300 transition-colors">
+                                👁️
+                            </button>
+                            <button onclick="addToCart('${
+                              item.id
+                            }')" class="whatsapp-btn text-white px-4 py-2 rounded-full text-sm">
+                                Ajouter
+                            </button>
+                        </div>
+                    </div>
+                `;
+          menuGrid.appendChild(menuItem);
+        });
+      }
+
+      function showItemDetails(itemId) {
+        let item;
+
+        if (itemId === "featured") {
+          item = {
+            name:
+              window.elementSdk?.config?.featured_item ||
+              defaultConfig.featured_item,
+            price: parseFloat(
+              (
+                window.elementSdk?.config?.featured_price ||
+                defaultConfig.featured_price
+              ).replace(" CFA", "")
+            ),
+            description:
+              "Notre création exclusive : double steak de bœuf premium, fromage cheddar affiné, salade croquante, tomate fraîche, oignon caramélisé et notre sauce secrète maison",
+            image: "🍔",
+          };
+        } else {
+          for (const category in menuItems) {
+            const foundItem = menuItems[category].find(
+              (menuItem) => menuItem.id === itemId
+            );
+            if (foundItem) {
+              item = foundItem;
+              break;
+            }
+          }
+        }
+
+        if (!item) return;
+
+        const modal = document.getElementById("item-modal");
+        const title = document.getElementById("item-modal-title");
+        const content = document.getElementById("item-modal-content");
+
+        title.textContent = item.name;
+        content.innerHTML = `
+                <div class="text-center mb-6">
+                    <span class="text-8xl">${item.image}</span>
+                </div>
+                <p class="text-gray-600 mb-4 text-lg">${item.description}</p>
+                <div class="flex items-center justify-between mb-6">
+                    <span class="text-3xl font-bold text-orange-600">${item.price.toLocaleString()} CFA</span>
+                    <div class="flex items-center gap-1">
+                        <span class="rating-stars">★★★★★</span>
+                        <span class="text-gray-600 ml-2">(4.8/5)</span>
+                    </div>
+                </div>
+                <button onclick="addToCart('${itemId}'); closeModal('item-modal')" class="w-full whatsapp-btn text-white py-3 rounded-lg font-bold text-lg">
+                    Ajouter au Panier
+                </button>
+            `;
+
+        modal.classList.add("show");
+      }
+
+      // Modal functions
+      function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove("show");
+      }
+
+      // WhatsApp functions
+      function orderWhatsApp() {
+        if (cart.length === 0) {
+          showNotification("Votre panier est vide !", "error");
+          return;
+        }
+
+        const phoneNumber =
+          window.elementSdk?.config?.phone_number || defaultConfig.phone_number;
+        const restaurantName =
+          window.elementSdk?.config?.restaurant_name ||
+          defaultConfig.restaurant_name;
+
+        let message = `Bonjour ${restaurantName}! Je souhaite commander:\n\n`;
+
+        cart.forEach((item) => {
+          message += `• ${item.name} x${item.quantity} - ${(
+            item.price * item.quantity
+          ).toLocaleString()} CFA\n`;
+        });
+
+        const total = cart.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
+        message += `\nTotal: ${total.toLocaleString()} CFA`;
+
+        const whatsappUrl = `https://wa.me/${phoneNumber.replace(
+          /[^0-9]/g,
+          ""
+        )}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      }
+
+      function orderItem(itemName, price) {
+        const phoneNumber =
+          window.elementSdk?.config?.phone_number || defaultConfig.phone_number;
+        const restaurantName =
+          window.elementSdk?.config?.restaurant_name ||
+          defaultConfig.restaurant_name;
+        const message = `Bonjour ${restaurantName}! Je souhaite commander: ${itemName} (${price})`;
+        const whatsappUrl = `https://wa.me/${phoneNumber.replace(
+          /[^0-9]/g,
+          ""
+        )}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      }
+
+      // External functions
+      function openGoogleMaps() {
+        const address =
+          window.elementSdk?.config?.address || defaultConfig.address;
+        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          address
+        )}`;
+        window.open(mapsUrl, "_blank", "noopener,noreferrer");
+      }
+
+      function callRestaurant() {
+        const phoneNumber =
+          window.elementSdk?.config?.phone_number || defaultConfig.phone_number;
+        window.open(`tel:${phoneNumber}`, "_self");
+      }
+
+      // Form handlers
+      async function handleReviewSubmit(event) {
+        event.preventDefault();
+
+        if (currentRecordCount >= 999) {
+          showNotification(
+            "Limite de 999 avis atteinte. Impossible d'ajouter un nouvel avis.",
+            "error"
+          );
+          return;
+        }
+
+        const submitBtn = document.getElementById("review-submit");
+        const originalText = showLoading(submitBtn);
+
+        const formData = {
+          id: Date.now().toString(),
+          type: "review",
+          name: document.getElementById("review-name").value,
+          email: document.getElementById("review-email").value,
+          message: document.getElementById("review-message").value,
+          rating: currentRating,
+          date: new Date().toISOString(),
+          status: "published",
+        };
+
+        if (window.dataSdk) {
+          const result = await window.dataSdk.create(formData);
+          if (result.isOk) {
+            showNotification("Merci pour votre avis !");
+            document.getElementById("review-form").reset();
+            resetStars();
+          } else {
+            showNotification("Erreur lors de l'envoi de l'avis", "error");
+          }
+        }
+
+        hideLoading(submitBtn, originalText);
+      }
+
+      async function handleContactSubmit(event) {
+        event.preventDefault();
+
+        if (currentRecordCount >= 999) {
+          showNotification(
+            "Limite de messages atteinte. Veuillez nous appeler directement.",
+            "error"
+          );
+          return;
+        }
+
+        const submitBtn = document.getElementById("contact-submit");
+        const originalText = showLoading(submitBtn);
+
+        const formData = {
+          id: Date.now().toString(),
+          type: "contact",
+          name: document.getElementById("contact-name").value,
+          email: document.getElementById("contact-email-form").value,
+          phone: document.getElementById("contact-phone-form").value,
+          message: document.getElementById("contact-message").value,
+          rating: 0,
+          date: new Date().toISOString(),
+          status: "pending",
+        };
+
+        if (window.dataSdk) {
+          const result = await window.dataSdk.create(formData);
+          if (result.isOk) {
+            showNotification("Message envoyé avec succès !");
+            document.getElementById("contact-form").reset();
+          } else {
+            showNotification("Erreur lors de l'envoi du message", "error");
+          }
+        }
+
+        hideLoading(submitBtn, originalText);
+      }
+
+      // Star rating functions
+      function setRating(rating) {
+        currentRating = rating;
+        const stars = document.querySelectorAll(".star-btn");
+        stars.forEach((star, index) => {
+          star.classList.toggle("text-yellow-400", index < rating);
+          star.classList.toggle("text-gray-300", index >= rating);
+        });
+      }
+
+      function resetStars() {
+        currentRating = 0;
+        const stars = document.querySelectorAll(".star-btn");
+        stars.forEach((star) => {
+          star.classList.remove("text-yellow-400");
+          star.classList.add("text-gray-300");
+        });
+      }
+
+      // Element SDK configuration
+      async function onConfigChange(config) {
+        // Update restaurant information
+        document.getElementById("nav-name").textContent =
+          config.restaurant_name || defaultConfig.restaurant_name;
+        document.getElementById("restaurant-name").textContent =
+          config.restaurant_name || defaultConfig.restaurant_name;
+        document.getElementById("restaurant-tagline").textContent =
+          config.restaurant_tagline || defaultConfig.restaurant_tagline;
+        document.getElementById("delivery-time").textContent =
+          config.delivery_time || defaultConfig.delivery_time;
+        document.getElementById("delivery-fee").textContent =
+          config.delivery_fee || defaultConfig.delivery_fee;
+
+        // Update contact information
+        document.getElementById("contact-address").textContent =
+          config.address || defaultConfig.address;
+        document.getElementById("contact-phone").textContent =
+          config.phone_number || defaultConfig.phone_number;
+        document.getElementById("contact-email").textContent =
+          config.email || defaultConfig.email;
+
+        // Update footer information
+        document.getElementById("footer-name").textContent =
+          config.restaurant_name || defaultConfig.restaurant_name;
+        document.getElementById("footer-address").textContent =
+          config.address || defaultConfig.address;
+        document.getElementById("footer-phone").textContent =
+          config.phone_number || defaultConfig.phone_number;
+        document.getElementById("footer-email-display").textContent =
+          config.email || defaultConfig.email;
+
+        // Update featured item
+        document.getElementById("featured-item").textContent =
+          config.featured_item || defaultConfig.featured_item;
+        document.getElementById("featured-price").textContent =
+          config.featured_price || defaultConfig.featured_price;
+
+        // Update social media links
+        const facebookLink = document.getElementById("footer-facebook");
+        const instagramLink = document.getElementById("footer-instagram");
+
+        if (config.facebook_url && config.facebook_url !== "#") {
+          facebookLink.href = config.facebook_url;
+          facebookLink.style.opacity = "1";
+        } else {
+          facebookLink.href = "#";
+          facebookLink.style.opacity = "0.5";
+        }
+
+        if (config.instagram_url && config.instagram_url !== "#") {
+          instagramLink.href = config.instagram_url;
+          instagramLink.style.opacity = "1";
+        } else {
+          instagramLink.href = "#";
+          instagramLink.style.opacity = "0.5";
+        }
+
+        // Update colors
+        const primaryColor =
+          config.primary_color || defaultConfig.primary_color;
+        const secondaryColor =
+          config.secondary_color || defaultConfig.secondary_color;
+        const surfaceColor =
+          config.surface_color || defaultConfig.surface_color;
+        const textColor = config.text_color || defaultConfig.text_color;
+        const accentColor = config.accent_color || defaultConfig.accent_color;
+
+        // Apply colors to elements
+        document.querySelector(
+          ".hero-bg"
+        ).style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+
+        // Update WhatsApp buttons
+        const whatsappButtons = document.querySelectorAll(".whatsapp-btn");
+        whatsappButtons.forEach((btn) => {
+          btn.style.backgroundColor = accentColor;
+        });
+
+        // Update text colors
+        document.body.style.color = textColor;
+
+        // Update dynamic styles
+        const style = document.createElement("style");
+        style.textContent = `
+                .menu-item:hover {
+                    border-left-color: ${primaryColor} !important;
+                    background-color: ${primaryColor}10 !important;
+                }
+                .whatsapp-btn:hover {
+                    background-color: ${accentColor}dd !important;
+                }
+                .category-btn.active {
+                    background-color: ${primaryColor} !important;
+                }
+                .category-btn:hover {
+                    background-color: ${primaryColor}20 !important;
+                }
+            `;
+        document.head.appendChild(style);
+      }
+
+      function mapToCapabilities(config) {
+        return {
+          recolorables: [
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                if (window.elementSdk) {
+                  window.elementSdk.setConfig({ primary_color: value });
+                }
+              },
+            },
+            {
+              get: () =>
+                config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => {
+                if (window.elementSdk) {
+                  window.elementSdk.setConfig({ secondary_color: value });
+                }
+              },
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                if (window.elementSdk) {
+                  window.elementSdk.setConfig({ surface_color: value });
+                }
+              },
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                if (window.elementSdk) {
+                  window.elementSdk.setConfig({ text_color: value });
+                }
+              },
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => {
+                if (window.elementSdk) {
+                  window.elementSdk.setConfig({ accent_color: value });
+                }
+              },
+            },
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined,
+        };
+      }
+
+      function mapToEditPanelValues(config) {
+        return new Map([
+          [
+            "restaurant_name",
+            config.restaurant_name || defaultConfig.restaurant_name,
+          ],
+          [
+            "restaurant_tagline",
+            config.restaurant_tagline || defaultConfig.restaurant_tagline,
+          ],
+          ["phone_number", config.phone_number || defaultConfig.phone_number],
+          ["address", config.address || defaultConfig.address],
+          ["email", config.email || defaultConfig.email],
+          [
+            "delivery_time",
+            config.delivery_time || defaultConfig.delivery_time,
+          ],
+          ["delivery_fee", config.delivery_fee || defaultConfig.delivery_fee],
+          [
+            "featured_item",
+            config.featured_item || defaultConfig.featured_item,
+          ],
+          [
+            "featured_price",
+            config.featured_price || defaultConfig.featured_price,
+          ],
+          ["facebook_url", config.facebook_url || defaultConfig.facebook_url],
+          [
+            "instagram_url",
+            config.instagram_url || defaultConfig.instagram_url,
+          ],
+        ]);
+      }
+
+      // Event listeners
+      document.addEventListener("DOMContentLoaded", function () {
+        // Initialize SDKs
+        initDataSdk();
+
+        // Initialize Element SDK
+        if (window.elementSdk) {
+          window.elementSdk.init({
+            defaultConfig,
+            onConfigChange,
+            mapToCapabilities,
+            mapToEditPanelValues,
+          });
+        }
+
+        // Initialize with default config
+        onConfigChange(defaultConfig);
+
+        // Render initial menu
+        renderMenu();
+
+        // Category buttons
+        document.querySelectorAll(".category-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document.querySelectorAll(".category-btn").forEach((b) => {
+              b.classList.remove("active", "bg-orange-600", "text-white");
+              b.classList.add("bg-white", "text-gray-700");
+            });
+            btn.classList.add("active", "bg-orange-600", "text-white");
+            btn.classList.remove("bg-white", "text-gray-700");
+
+            const category = btn.dataset.category;
+            renderMenu(category);
+          });
+        });
+
+        // Cart buttons
+        document.getElementById("cart-btn").addEventListener("click", () => {
+          document.getElementById("cart-modal").classList.add("show");
+        });
+
+        document
+          .getElementById("floating-cart-btn")
+          .addEventListener("click", () => {
+            document.getElementById("cart-modal").classList.add("show");
+          });
+
+        document.getElementById("close-cart").addEventListener("click", () => {
+          closeModal("cart-modal");
+        });
+
+        document
+          .getElementById("close-item-modal")
+          .addEventListener("click", () => {
+            closeModal("item-modal");
+          });
+
+        document
+          .getElementById("checkout-btn")
+          .addEventListener("click", () => {
+            orderWhatsApp();
+            closeModal("cart-modal");
+          });
+
+        // Hero order button
+        document
+          .getElementById("hero-order-btn")
+          .addEventListener("click", () => {
+            const featuredItem =
+              window.elementSdk?.config?.featured_item ||
+              defaultConfig.featured_item;
+            const featuredPrice =
+              window.elementSdk?.config?.featured_price ||
+              defaultConfig.featured_price;
+            orderItem(featuredItem, featuredPrice);
+          });
+
+        // Form submissions
+        document
+          .getElementById("review-form")
+          .addEventListener("submit", handleReviewSubmit);
+        document
+          .getElementById("contact-form")
+          .addEventListener("submit", handleContactSubmit);
+
+        // Star rating
+        document.querySelectorAll(".star-btn").forEach((star) => {
+          star.addEventListener("click", (e) => {
+            e.preventDefault();
+            const rating = parseInt(star.dataset.rating);
+            setRating(rating);
+          });
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach((link) => {
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute("href");
+            const element = document.querySelector(targetId);
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth" });
+            }
+          });
+        });
+
+        // Close modals when clicking outside
+        document.querySelectorAll(".modal").forEach((modal) => {
+          modal.addEventListener("click", (e) => {
+            if (e.target === modal) {
+              modal.classList.remove("show");
+            }
+          });
+        });
+      });
+    </script>
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'99ee8b4671142941',t:'MTc2MzIwNzU2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
